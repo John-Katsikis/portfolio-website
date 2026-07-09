@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yianni — Aspiring Game & Graphics Programmer</title>
+  <meta name="description" content="My portfolio. Real-time rendering, procedural worlds, and computer vision." />
+
+  <!--
+    Theme bootstrap — runs BEFORE anything paints.
+    Reads the saved preference (or the OS preference) and applies the
+    .dark class immediately, so there is never a flash of the wrong theme.
+  -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Big Shoulders (architectural display) / Archivo (body) / IBM Plex Mono (labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Tailwind CSS (Play CDN) + inline config mapping utilities to the CSS theme variables -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Big Shoulders Display"', 'sans-serif'],
+            body: ['Archivo', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'monospace'],
+          },
+          colors: {
+            paper: 'var(--paper)',   /* page background            */
+            ink: 'var(--ink)',       /* primary text               */
+            soft: 'var(--soft)',     /* secondary text             */
+            line: 'var(--line)',     /* hairlines and borders      */
+            accent: 'var(--accent)', /* blueprint cobalt           */
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Custom structural styles, masking, theme variables, scrollbar -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- GSAP core + ScrollTrigger -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+  <script defer src="script.js"></script>
+</head>
+
+<body class="bg-paper font-body text-ink theme-fade antialiased">
+
+  <!-- ============================================================ -->
+  <!-- NAVIGATION                                                   -->
+  <!-- ============================================================ -->
+  <header class="fixed inset-x-0 top-0 z-50">
+    <nav class="theme-fade mx-auto flex max-w-7xl items-center justify-between border-b border-line bg-paper/80 px-6 py-4 backdrop-blur-md md:px-10">
+      <a href="#top" class="font-display text-lg font-extrabold tracking-wide uppercase">
+        Yianni<span class="text-accent">.</span>
+      </a>
+
+      <div class="flex items-center gap-6 md:gap-9">
+        <a href="#work" class="hidden font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink sm:block">Work</a>
+        <a href="#about" class="hidden font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink sm:block">About</a>
+        <a href="#contact" class="hidden font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink sm:block">Contact</a>
+
+        <!-- Light / Dark toggle -->
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="Toggle dark mode"
+          class="theme-fade group relative flex h-8 w-14 items-center rounded-full border border-line px-1"
+        >
+          <!-- sliding knob -->
+          <span class="theme-knob theme-fade flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper">
+            <!-- sun (shown in light mode) -->
+            <svg class="h-3.5 w-3.5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            </svg>
+            <!-- moon (shown in dark mode) -->
+            <svg class="hidden h-3.5 w-3.5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- ============================================================ -->
+    <!-- HERO — massive asymmetric typography, mask reveal            -->
+    <!-- ============================================================ -->
+    <section class="mx-auto flex min-h-screen max-w-7xl flex-col justify-end px-6 pb-16 pt-32 md:px-10">
+      <p class="reveal-line mb-6">
+        <span class="reveal-text font-mono text-xs uppercase tracking-[0.3em] text-accent">Portfolio — 2026</span>
+      </p>
+
+      <h1 class="font-display font-extrabold uppercase leading-[0.9]">
+        <span class="reveal-line block">
+          <span class="reveal-text block text-[16vw] md:text-[11rem]">Yianni</span>
+        </span>
+        <!-- second line pushed right: the asymmetry -->
+        <span class="reveal-line block text-right md:pr-[8vw]">
+          <span class="reveal-text block text-[9.5vw] text-soft md:text-[6.5rem]">Graphics &amp; Games</span>
+        </span>
+      </h1>
+
+      <div class="mt-14 grid grid-cols-1 gap-8 border-t border-line pt-8 md:grid-cols-12">
+        <p class="reveal-line md:col-span-5 md:col-start-1">
+          <span class="reveal-text block max-w-md text-base leading-relaxed text-soft">
+            Real-time rendering, procedural worlds and computer vision.
+            BSc Computer Science with Games Technology — First Class.
+            MSc Computer Graphics, Vision &amp; Imaging at UCL.
+          </span>
+        </p>
+        <p class="reveal-line md:col-span-3 md:col-start-8">
+          <span class="reveal-text block font-mono text-xs uppercase leading-loose tracking-[0.2em] text-soft">
+            C++ / OpenGL<br />Unreal Engine 5<br />Rust / Python
+          </span>
+        </p>
+        <p class="reveal-line md:col-span-2 md:col-start-11">
+          <span class="reveal-text block font-mono text-xs uppercase leading-loose tracking-[0.2em] text-soft">
+            London, UK<br />↓ Scroll
+          </span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- WORK — staggered 2-column grid with parallax visuals         -->
+    <!-- ============================================================ -->
+    <section id="work" class="mx-auto max-w-7xl px-6 py-28 md:px-10">
+      <div class="mb-16 flex items-end justify-between border-b border-line pb-6">
+        <h2 class="font-display text-5xl font-bold uppercase md:text-7xl">Selected<br />Work</h2>
+        <span class="font-mono text-xs uppercase tracking-[0.2em] text-soft">05 projects</span>
+      </div>
+
+      <!--
+        The staggered layout: two columns; the right column is pushed
+        down (md:mt-32) so items alternate visually as you scroll.
+        Each .work-visual contains a .parallax-inner that ScrollTrigger
+        moves slightly faster than the card itself.
+      -->
+      <div class="grid grid-cols-1 gap-x-10 gap-y-20 md:grid-cols-2">
+
+        <!-- Column A -->
+        <div class="flex flex-col gap-20">
+
+          <!-- Project 01 -->
+          <article class="work-item group">
+            <a href="https://github.com/your-username" class="block">
+              <div class="work-visual theme-fade relative overflow-hidden border border-line bg-line/30" style="aspect-ratio: 4 / 3;">
+                <div class="parallax-inner absolute inset-x-0 -top-[15%] h-[130%]">
+                  <!-- Generative cover: procedural planet -->
+                  <svg class="h-full w-full" viewBox="0 0 400 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <circle cx="200" cy="170" r="110" fill="none" stroke="var(--ink)" stroke-width="1.5" />
+                    <ellipse cx="200" cy="170" rx="110" ry="40" fill="none" stroke="var(--soft)" stroke-width="1" />
+                    <ellipse cx="200" cy="170" rx="110" ry="75" fill="none" stroke="var(--soft)" stroke-width="0.75" />
+                    <ellipse cx="200" cy="170" rx="40" ry="110" fill="none" stroke="var(--soft)" stroke-width="1" />
+                    <ellipse cx="200" cy="170" rx="75" ry="110" fill="none" stroke="var(--soft)" stroke-width="0.75" />
+                    <circle cx="288" cy="96" r="6" fill="var(--accent)" />
+                    <text x="24" y="316" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--soft)">seed: 8721-A · deterministic</text>
+                  </svg>
+                </div>
+              </div>
+              <div class="mt-5 flex items-baseline justify-between">
+                <h3 class="font-display text-2xl font-bold uppercase transition-colors group-hover:text-accent">Procedural Planet Generation</h3>
+                <span class="font-mono text-xs text-soft">2026</span>
+              </div>
+              <p class="mt-2 max-w-md text-sm leading-relaxed text-soft">
+                Dissertation project: deterministic procedural planets in Unreal Engine 5, with cross-instance
+                seed reproducibility verified through PCG-spawned object comparison.
+              </p>
+              <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.15em] text-soft">UE5 · C++ · Voxel · PCG</p>
+            </a>
+          </article>
+
+          <!-- Project 03 -->
+          <article class="work-item group">
+            <a href="https://github.com/your-username" class="block">
+              <div class="work-visual theme-fade relative overflow-hidden border border-line bg-line/30" style="aspect-ratio: 4 / 3;">
+                <div class="parallax-inner absolute inset-x-0 -top-[15%] h-[130%]">
+                  <!-- Generative cover: spline track -->
+                  <svg class="h-full w-full" viewBox="0 0 400 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <path d="M 40 260 C 120 120, 180 320, 250 200 S 380 90, 360 60" fill="none" stroke="var(--ink)" stroke-width="1.5" />
+                    <path d="M 40 280 C 120 140, 180 340, 250 220 S 380 110, 360 80" fill="none" stroke="var(--soft)" stroke-width="1" stroke-dasharray="4 6" />
+                    <circle cx="250" cy="200" r="5" fill="var(--accent)" />
+                    <circle cx="120" cy="197" r="3" fill="none" stroke="var(--soft)" />
+                    <circle cx="330" cy="120" r="3" fill="none" stroke="var(--soft)" />
+                    <text x="24" y="316" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--soft)">catmull-rom · lap 02/03</text>
+                  </svg>
+                </div>
+              </div>
+              <div class="mt-5 flex items-baseline justify-between">
+                <h3 class="font-display text-2xl font-bold uppercase transition-colors group-hover:text-accent">Spline Racer</h3>
+                <span class="font-mono text-xs text-soft">2026</span>
+              </div>
+              <p class="mt-2 max-w-md text-sm leading-relaxed text-soft">
+                OpenGL racing game on a Catmull-Rom spline track — Blinn-Phong spotlights,
+                particle exhaust system, and lap &amp; collision detection.
+              </p>
+              <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.15em] text-soft">OpenGL · C++ · GLSL</p>
+            </a>
+          </article>
+
+          <!-- Project 05 -->
+          <article class="work-item group">
+            <a href="https://github.com/your-username" class="block">
+              <div class="work-visual theme-fade relative overflow-hidden border border-line bg-line/30" style="aspect-ratio: 4 / 3;">
+                <div class="parallax-inner absolute inset-x-0 -top-[15%] h-[130%]">
+                  <!-- Generative cover: face detection frame -->
+                  <svg class="h-full w-full" viewBox="0 0 400 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <rect x="130" y="90" width="140" height="160" fill="none" stroke="var(--accent)" stroke-width="1.5" />
+                    <path d="M130 90 h18 M130 90 v18 M270 90 h-18 M270 90 v18 M130 250 h18 M130 250 v-18 M270 250 h-18 M270 250 v-18" stroke="var(--accent)" stroke-width="3" />
+                    <circle cx="200" cy="150" r="34" fill="none" stroke="var(--ink)" stroke-width="1.5" />
+                    <path d="M166 214 q34 -30 68 0" fill="none" stroke="var(--ink)" stroke-width="1.5" />
+                    <text x="138" y="80" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--soft)">class: 18-30 · p=0.86</text>
+                    <text x="24" y="316" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--soft)">svm / mlp / cnn</text>
+                  </svg>
+                </div>
+              </div>
+              <div class="mt-5 flex items-baseline justify-between">
+                <h3 class="font-display text-2xl font-bold uppercase transition-colors group-hover:text-accent">Age Classification</h3>
+                <span class="font-mono text-xs text-soft">2026</span>
+              </div>
+              <p class="mt-2 max-w-md text-sm leading-relaxed text-soft">
+                Three age-classification models (SVM, MLP, CNN) compared across four age brackets,
+                with a live webcam demo built on Haar cascades. Graded 86%.
+              </p>
+              <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.15em] text-soft">Python · OpenCV · ML</p>
+            </a>
+          </article>
+        </div>
+
+        <!-- Column B — offset downwards to create the stagger -->
+        <div class="flex flex-col gap-20 md:mt-32">
+
+          <!-- Project 02 -->
+          <article class="work-item group">
+            <a href="https://github.com/your-username" class="block">
+              <div class="work-visual theme-fade relative overflow-hidden border border-line bg-line/30" style="aspect-ratio: 4 / 3;">
+                <div class="parallax-inner absolute inset-x-0 -top-[15%] h-[130%]">
+                  <!-- Generative cover: waveform from an expression -->
+                  <svg class="h-full w-full" viewBox="0 0 400 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <path d="M 30 170 q 20 -90 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0" fill="none" stroke="var(--ink)" stroke-width="1.5" />
+                    <line x1="30" y1="170" x2="370" y2="170" stroke="var(--soft)" stroke-width="0.75" stroke-dasharray="2 6" />
+                    <text x="30" y="70" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--accent)">&gt; play sin(2*pi*x)</text>
+                    <text x="24" y="316" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--soft)">pandemonium v0.1 · 🐼</text>
+                  </svg>
+                </div>
+              </div>
+              <div class="mt-5 flex items-baseline justify-between">
+                <h3 class="font-display text-2xl font-bold uppercase transition-colors group-hover:text-accent">Pandemonium</h3>
+                <span class="font-mono text-xs text-soft">2026</span>
+              </div>
+              <p class="mt-2 max-w-md text-sm leading-relaxed text-soft">
+                A math shell written in Rust — command dispatch architecture, AST-based expression
+                parsing, and audio waveform generation straight from mathematical expressions.
+              </p>
+              <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.15em] text-soft">Rust · AST · Audio DSP</p>
+            </a>
+          </article>
+
+          <!-- Project 04 -->
+          <article class="work-item group">
+            <a href="https://github.com/your-username" class="block">
+              <div class="work-visual theme-fade relative overflow-hidden border border-line bg-line/30" style="aspect-ratio: 4 / 3;">
+                <div class="parallax-inner absolute inset-x-0 -top-[15%] h-[130%]">
+                  <!-- Generative cover: FPS crosshair scene -->
+                  <svg class="h-full w-full" viewBox="0 0 400 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <line x1="200" y1="140" x2="200" y2="200" stroke="var(--accent)" stroke-width="1.5" />
+                    <line x1="170" y1="170" x2="230" y2="170" stroke="var(--accent)" stroke-width="1.5" />
+                    <circle cx="200" cy="170" r="46" fill="none" stroke="var(--soft)" stroke-width="1" />
+                    <polygon points="70,240 110,210 150,240 110,262" fill="none" stroke="var(--ink)" stroke-width="1.25" />
+                    <polygon points="270,110 306,88 342,110 306,130" fill="none" stroke="var(--ink)" stroke-width="1.25" />
+                    <text x="24" y="316" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--soft)">ammo 12/48 · gravity on</text>
+                  </svg>
+                </div>
+              </div>
+              <div class="mt-5 flex items-baseline justify-between">
+                <h3 class="font-display text-2xl font-bold uppercase transition-colors group-hover:text-accent">Yetijax&rsquo;s Space Adventure</h3>
+                <span class="font-mono text-xs text-soft">2025</span>
+              </div>
+              <p class="mt-2 max-w-md text-sm leading-relaxed text-soft">
+                First-person shooter in OpenGL/C++ with a procedurally populated environment,
+                a particle system and physics-based bullet mechanics. Graded 80.
+              </p>
+              <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.15em] text-soft">OpenGL · C++ · Physics</p>
+            </a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- ABOUT & EXPERIENCE — multi-column timeline                   -->
+    <!-- ============================================================ -->
+    <section id="about" class="theme-fade border-y border-line">
+      <div class="mx-auto max-w-7xl px-6 py-28 md:px-10">
+        <h2 class="font-display mb-16 text-5xl font-bold uppercase md:text-7xl">About &amp;<br />Experience</h2>
+
+        <div class="grid grid-cols-1 gap-14 md:grid-cols-3">
+
+          <!-- Column 1: Timeline -->
+          <div>
+            <h3 class="mb-8 font-mono text-xs uppercase tracking-[0.3em] text-accent">Timeline</h3>
+            <ol class="space-y-10 border-l border-line pl-6">
+              <li>
+                <p class="font-mono text-xs text-soft">2026 — 2027</p>
+                <p class="mt-1 font-semibold">MSc Computer Graphics, Vision &amp; Imaging</p>
+                <p class="text-sm text-soft">University College London</p>
+              </li>
+              <li>
+                <p class="font-mono text-xs text-soft">2023 — 2026</p>
+                <p class="mt-1 font-semibold">BSc Computer Science with Games Technology</p>
+                <p class="text-sm text-soft">City, University of London — First Class Honours</p>
+              </li>
+              <li>
+                <p class="font-mono text-xs text-soft">2026</p>
+                <p class="mt-1 font-semibold">Dissertation: Procedural Planet Generation</p>
+                <p class="text-sm text-soft">Deterministic worlds in UE5, seed-reproducible across instances</p>
+              </li>
+            </ol>
+          </div>
+
+          <!-- Column 2: Skills -->
+          <div>
+            <h3 class="mb-8 font-mono text-xs uppercase tracking-[0.3em] text-accent">Skills</h3>
+            <ul class="space-y-4">
+              <li class="flex items-baseline justify-between border-b border-line pb-3">
+                <span class="font-semibold">C++ / OpenGL / GLSL</span>
+                <span class="font-mono text-xs text-soft">Rendering</span>
+              </li>
+              <li class="flex items-baseline justify-between border-b border-line pb-3">
+                <span class="font-semibold">Unreal Engine 5</span>
+                <span class="font-mono text-xs text-soft">Engine / PCG</span>
+              </li>
+              <li class="flex items-baseline justify-between border-b border-line pb-3">
+                <span class="font-semibold">Rust</span>
+                <span class="font-mono text-xs text-soft">Systems</span>
+              </li>
+              <li class="flex items-baseline justify-between border-b border-line pb-3">
+                <span class="font-semibold">Python / OpenCV</span>
+                <span class="font-mono text-xs text-soft">Computer vision</span>
+              </li>
+              <li class="flex items-baseline justify-between border-b border-line pb-3">
+                <span class="font-semibold">Java</span>
+                <span class="font-mono text-xs text-soft">General</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Column 3: Focus areas -->
+          <div>
+            <h3 class="mb-8 font-mono text-xs uppercase tracking-[0.3em] text-accent">What I do</h3>
+            <ul class="space-y-8">
+              <li>
+                <p class="font-semibold">Real-time rendering</p>
+                <p class="mt-1 text-sm leading-relaxed text-soft">Graphics pipelines, lighting models, shaders and particle systems that hold their frame budget.</p>
+              </li>
+              <li>
+                <p class="font-semibold">Procedural generation</p>
+                <p class="mt-1 text-sm leading-relaxed text-soft">Deterministic, seed-driven worlds — the same universe on every machine, every time.</p>
+              </li>
+              <li>
+                <p class="font-semibold">Computer vision &amp; ML</p>
+                <p class="mt-1 text-sm leading-relaxed text-soft">Classification pipelines from classical methods to CNNs, including live-camera demos.</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- CONTACT FOOTER — magnetic email link                         -->
+    <!-- ============================================================ -->
+    <footer id="contact" class="mx-auto max-w-7xl px-6 py-32 md:px-10">
+      <p class="font-mono text-xs uppercase tracking-[0.3em] text-accent">Contact</p>
+
+      <!-- The magnetic wrapper listens to the pointer; the inner link is what moves -->
+      <div class="magnetic-area mt-10 inline-block">
+        <!-- TODO: replace with your real email address -->
+        <a
+          href="mailto:hello@example.com"
+          class="magnetic-target font-display inline-block text-[11vw] font-extrabold uppercase leading-none underline decoration-accent decoration-[0.04em] underline-offset-[0.12em] md:text-8xl"
+        >
+          Say hello
+        </a>
+      </div>
+
+      <div class="mt-20 flex flex-col justify-between gap-6 border-t border-line pt-8 sm:flex-row">
+        <p class="font-mono text-xs text-soft">© <span id="year">2026</span> Yianni — London / Athens</p>
+        <div class="flex gap-8">
+          <div class="magnetic-area"><a href="https://github.com/your-username" class="magnetic-target font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink">GitHub</a></div>
+          <div class="magnetic-area"><a href="https://www.linkedin.com/in/your-handle" class="magnetic-target font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink">LinkedIn</a></div>
+        </div>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

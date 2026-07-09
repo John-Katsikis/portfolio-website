@@ -1,0 +1,192 @@
+/* ==================================================================
+   style.css
+   ------------------------------------------------------------------
+   Everything Tailwind doesn't handle:
+     1. Theme variables (light + dark) — the single place colors live
+     2. The fluid light/dark transition
+     3. Structural resets
+     4. Typography mask-reveal scaffolding
+     5. Magnetic link behaviour (the will-change hint; motion is GSAP)
+     6. Custom scrollbar
+     7. Reduced-motion safety net
+   ================================================================== */
+
+/* ------------------------------------------------------------------
+   1. THEME VARIABLES
+   Light mode is the default. Adding .dark to <html> (done by
+   script.js) swaps every variable at once — and because the elements
+   that use them carry the .theme-fade transition, the whole page
+   cross-fades smoothly between themes.
+   ------------------------------------------------------------------ */
+:root {
+  --paper: #f4f4f0;   /* gallery off-white                      */
+  --ink: #131311;     /* near-black text                        */
+  --soft: #6d6e67;    /* secondary text                         */
+  --line: #d8d8d0;    /* hairlines / borders                    */
+  --accent: #2438e8;  /* blueprint cobalt                       */
+
+  color-scheme: light;
+}
+
+html.dark {
+  --paper: #0d0e10;   /* deep graphite                          */
+  --ink: #ecede8;     /* paper-white text                       */
+  --soft: #8f918b;
+  --line: #26272b;
+  --accent: #7681ff;  /* lifted cobalt for dark contrast        */
+
+  color-scheme: dark;
+}
+
+/* The fluid part of "fluid light/dark mode" */
+.theme-fade,
+body {
+  transition:
+    background-color 0.5s ease,
+    border-color 0.5s ease,
+    color 0.5s ease;
+}
+
+/* ------------------------------------------------------------------
+   2. STRUCTURAL RESETS
+   ------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100svh;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden; /* oversized hero type can brush the edge on small screens */
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------
+   3. TYPOGRAPHY MASK REVEAL
+   Each .reveal-line is a clipping window; the .reveal-text inside it
+   slides up from below (GSAP animates it from translateY(110%)).
+   Without JavaScript the text simply sits visible — nothing breaks.
+   ------------------------------------------------------------------ */
+.reveal-line {
+  display: block;
+  overflow: hidden; /* the mask */
+  clip-path: inset(0 0 0 0); /* crisp clipping even during transforms */
+}
+
+.reveal-text {
+  display: block;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------
+   4. PARALLAX VISUALS
+   The inner layer is 130% tall and offset -15%, giving GSAP ±12% of
+   travel (plus the Ken Burns scale) without ever exposing an edge.
+   The frame itself is clip-path animated for the curtain-lift reveal.
+   ------------------------------------------------------------------ */
+.parallax-inner {
+  will-change: transform;
+}
+
+.work-visual {
+  will-change: clip-path;
+}
+
+/* ------------------------------------------------------------------
+   5. MAGNETIC LINKS
+   GSAP moves .magnetic-target toward the pointer while it is inside
+   .magnetic-area. The generous padding enlarges the "gravity field".
+   ------------------------------------------------------------------ */
+.magnetic-area {
+  display: inline-block;
+  padding: 0.75rem;
+  margin: -0.75rem;
+}
+
+.magnetic-target {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------
+   6. CUSTOM SCROLLBAR
+   Thin, theme-aware, and out of the way.
+   ------------------------------------------------------------------ */
+html {
+  scrollbar-width: thin;                       /* Firefox */
+  scrollbar-color: var(--soft) transparent;    /* Firefox */
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--soft);
+  border-radius: 999px;
+  border: 2px solid var(--paper);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* ------------------------------------------------------------------
+   7. THEME TOGGLE KNOB
+   The knob slides across the pill when .dark is present.
+   ------------------------------------------------------------------ */
+.theme-knob {
+  transform: translateX(0);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.dark .theme-knob {
+  transform: translateX(1.5rem); /* pill width 3.5rem - knob 1.5rem - padding */
+}
+
+/* ------------------------------------------------------------------
+   8. REDUCED MOTION — accessibility safety net
+   script.js also checks this, but CSS guarantees it even if JS runs.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
