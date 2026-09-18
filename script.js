@@ -82,8 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
     withWipe(themeToggle, () => setTheme(next));
   });
 
-  /* Random palette: one hue for the accent, a second hue that faintly
-     tints paper/ink/soft/line, generated for both themes at once. */
+  /* Random palette: every colour gets its own hue and saturation; only
+     lightness is pinned to bands that keep text readable in each theme. */
   const hslToHex = (h, s, l) => {
     s /= 100; l /= 100;
     const k = (n) => (n + h / 30) % 12;
@@ -91,24 +91,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const f = (n) => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
     return '#' + [f(0), f(8), f(4)].map((v) => v.toString(16).padStart(2, '0')).join('');
   };
+  const rand = (min, max) => min + Math.random() * (max - min);
   const randomPalette = () => {
-    const accentHue = Math.random() * 360;
-    const tintHue = (accentHue + 120 + Math.random() * 120) % 360;
-    const tint = 8 + Math.random() * 14;
+    const paperHue = rand(0, 360);
+    const inkHue = rand(0, 360);
+    const softHue = rand(0, 360);
+    const accentHue = (paperHue + rand(60, 300)) % 360; // always clashes with the paper
     return {
       light: {
-        paper: hslToHex(tintHue, tint + 6, 95.5),
-        ink: hslToHex(tintHue, tint, 8),
-        soft: hslToHex(tintHue, tint * 0.6, 42),
-        line: hslToHex(tintHue, tint, 84),
-        accent: hslToHex(accentHue, 82, 48),
+        paper: hslToHex(paperHue, rand(25, 60), rand(88, 94)),
+        ink: hslToHex(inkHue, rand(40, 85), rand(10, 20)),
+        soft: hslToHex(softHue, rand(30, 65), rand(34, 46)),
+        line: hslToHex(paperHue, rand(25, 50), rand(74, 82)),
+        accent: hslToHex(accentHue, rand(80, 98), rand(42, 54)),
       },
       dark: {
-        paper: hslToHex(tintHue, tint, 6),
-        ink: hslToHex(tintHue, tint * 0.7, 92),
-        soft: hslToHex(tintHue, tint * 0.5, 58),
-        line: hslToHex(tintHue, tint * 0.6, 16),
-        accent: hslToHex(accentHue, 78, 68),
+        paper: hslToHex(paperHue, rand(30, 60), rand(6, 12)),
+        ink: hslToHex(inkHue, rand(30, 70), rand(88, 95)),
+        soft: hslToHex(softHue, rand(30, 60), rand(56, 68)),
+        line: hslToHex(paperHue, rand(25, 50), rand(18, 26)),
+        accent: hslToHex(accentHue, rand(75, 95), rand(62, 74)),
       },
     };
   };
