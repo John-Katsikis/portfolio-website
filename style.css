@@ -106,6 +106,33 @@ a {
   will-change: transform;
 }
 
+/* Once the entrance has played, drop the mask so the springy hero
+   letters (and descenders) can leave the line box. */
+.reveal-line.is-revealed {
+  overflow: visible;
+  clip-path: none;
+}
+
+.letter {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Pre-hide animated elements only when JS is present AND motion is
+   allowed, so nothing flashes before GSAP takes over. Without JS (or
+   with reduced motion) everything is simply visible. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js .reveal-text {
+    transform: translateY(110%);
+  }
+  html.js .work-visual {
+    clip-path: inset(100% 0 0 0);
+  }
+  html.js .work-item a > :not(.work-visual) {
+    opacity: 0;
+  }
+}
+
 /* ------------------------------------------------------------------
    4. PARALLAX VISUALS
    The inner layer is 130% tall and offset -15%, giving GSAP ±12% of
@@ -177,7 +204,93 @@ html.dark .theme-knob {
 }
 
 /* ------------------------------------------------------------------
-   8. REDUCED MOTION — accessibility safety net
+   8. THEME WIPE (View Transitions API)
+   script.js animates a circle clip-path on the new snapshot so the
+   theme change radiates out from the toggle. Default cross-fade off.
+   ------------------------------------------------------------------ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 0;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* CSS transitions mid-flight would be captured half-faded in the
+   snapshot, so they are suspended while the wipe runs. */
+html.vt *:not(.theme-knob) {
+  transition: none !important;
+}
+
+/* ------------------------------------------------------------------
+   9. WIREFRAME MODE — Konami code easter egg
+   ------------------------------------------------------------------ */
+html.wireframe *:not(svg *):not(canvas):not(#toast):not(#wire-badge) {
+  outline: 1px solid color-mix(in srgb, var(--accent) 40%, transparent) !important;
+  outline-offset: -1px !important;
+}
+
+html.wireframe body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 3px,
+    color-mix(in srgb, var(--accent) 7%, transparent) 3px 4px
+  );
+}
+
+html.wireframe img {
+  filter: grayscale(1) contrast(1.4);
+  opacity: 0.6;
+}
+
+html.wireframe .work-visual {
+  background-color: transparent !important;
+}
+
+#wire-badge {
+  display: none;
+}
+
+html.wireframe #wire-badge {
+  display: block;
+}
+
+/* ------------------------------------------------------------------
+   10. TOAST
+   ------------------------------------------------------------------ */
+#toast {
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+kbd {
+  font-family: inherit;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0 0.35em;
+}
+
+/* ------------------------------------------------------------------
+   11. REDUCED MOTION — accessibility safety net
    script.js also checks this, but CSS guarantees it even if JS runs.
    ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {

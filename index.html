@@ -18,6 +18,7 @@
       if (saved === 'dark' || (!saved && prefersDark)) {
         document.documentElement.classList.add('dark');
       }
+      document.documentElement.classList.add('js');
     })();
   </script>
 
@@ -107,22 +108,39 @@
     <!-- ============================================================ -->
     <!-- HERO — massive asymmetric typography, mask reveal            -->
     <!-- ============================================================ -->
-    <section class="mx-auto flex min-h-screen max-w-7xl flex-col justify-end px-6 pb-16 pt-32 md:px-10">
-      <p class="reveal-line mb-6">
-        <span class="reveal-text font-mono text-xs uppercase tracking-[0.3em] text-accent">Portfolio — 2026</span>
-      </p>
+    <section id="hero" class="relative mx-auto flex min-h-screen max-w-7xl flex-col justify-end px-6 pb-16 pt-32 md:px-10">
+      <!-- Seeded procedural planet, drawn on canvas by script.js. Follows the pointer; R regenerates it. -->
+      <canvas
+        id="globe"
+        class="pointer-events-none absolute right-[-14vw] top-[12vh] aspect-square w-[80vw] max-w-[46rem] md:right-[-2vw] md:top-[4vh]"
+        aria-hidden="true"
+      ></canvas>
 
-      <h1 class="font-display font-extrabold uppercase leading-[0.9]">
+      <div class="relative mb-6 flex items-baseline justify-between gap-6">
+        <p class="reveal-line">
+          <span class="reveal-text whitespace-nowrap font-mono text-xs uppercase tracking-[0.3em] text-accent">Portfolio — 2026</span>
+        </p>
+        <p class="reveal-line">
+          <button
+            id="seed-btn"
+            type="button"
+            title="Regenerate the planet (or press R)"
+            class="reveal-text whitespace-nowrap font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-accent"
+          >seed 0x<span id="seed-value">8721</span><span class="hidden sm:inline"> · regen</span></button>
+        </p>
+      </div>
+
+      <h1 class="relative font-display font-extrabold uppercase leading-[0.9]">
         <span class="reveal-line block">
-          <span class="reveal-text block text-[16vw] md:text-[11rem]">Yianni</span>
+          <span class="reveal-text hero-word block text-[16vw] md:text-[11rem]">Yianni</span>
         </span>
         <!-- second line pushed right: the asymmetry -->
         <span class="reveal-line block text-right md:pr-[8vw]">
-          <span class="reveal-text block text-[9.5vw] text-soft md:text-[6.5rem]">Graphics &amp; Games</span>
+          <span class="reveal-text hero-word block text-[9.5vw] text-soft md:text-[6.5rem]">Graphics &amp; Games</span>
         </span>
       </h1>
 
-      <div class="mt-14 grid grid-cols-1 gap-8 border-t border-line pt-8 md:grid-cols-12">
+      <div class="relative mt-14 grid grid-cols-1 gap-8 border-t border-line pt-8 md:grid-cols-12">
         <p class="reveal-line md:col-span-5 md:col-start-1">
           <span class="reveal-text block max-w-md text-base leading-relaxed text-soft">
             Real-time rendering, procedural worlds and computer vision.
@@ -392,9 +410,8 @@
 
       <!-- The magnetic wrapper listens to the pointer; the inner link is what moves -->
       <div class="magnetic-area mt-10 inline-block">
-        <!-- TODO: replace with your real email address -->
         <a
-          href="mailto:hello@example.com"
+          href="mailto:johnkatsikis28@gmail.com"
           class="magnetic-target font-display inline-block text-[11vw] font-extrabold uppercase leading-none underline decoration-accent decoration-[0.04em] underline-offset-[0.12em] md:text-8xl"
         >
           Say hello
@@ -402,14 +419,35 @@
       </div>
 
       <div class="mt-20 flex flex-col justify-between gap-6 border-t border-line pt-8 sm:flex-row">
-        <p class="font-mono text-xs text-soft">© <span id="year">2026</span> Yiannis Katsikis — London / Athens</p>
+        <p class="font-mono text-xs text-soft">
+          © <span id="year">2026</span> Yiannis Katsikis —
+          <span id="clock-london">London</span> / <span id="clock-athens">Athens</span>
+        </p>
         <p class="font-mono text-xs text-soft">Designed & built with Claude (Fable 5)</p>
         <div class="flex gap-8">
           <div class="magnetic-area"><a href="https://github.com/John-Katsikis" class="magnetic-target font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink">GitHub</a></div>
           <div class="magnetic-area"><a href="https://www.linkedin.com/in/yiannis-katsikis-54bac/" class="magnetic-target font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink">LinkedIn</a></div>
         </div>
       </div>
+
+      <p class="mt-6 hidden font-mono text-[11px] text-soft/70 md:block">
+        psst — <kbd>`</kbd> stats overlay · <kbd>R</kbd> new planet · <kbd>↑↑↓↓←→←→BA</kbd> wireframe mode
+      </p>
     </footer>
   </main>
+
+  <!-- Scroll progress hairline -->
+  <div id="scroll-progress" class="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] origin-left bg-accent" style="transform: scaleX(0);" aria-hidden="true"></div>
+
+  <!-- Toast for easter-egg feedback -->
+  <div id="toast" class="pointer-events-none fixed bottom-6 left-1/2 z-[70] border border-line bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.15em] text-ink" role="status" aria-live="polite"></div>
+
+  <!-- Dev stats overlay: toggle with ` -->
+  <div id="stats" hidden class="pointer-events-none fixed bottom-4 left-4 z-[70] border border-line bg-paper/90 px-3 py-2 font-mono text-[11px] leading-relaxed text-soft backdrop-blur-sm">
+    <pre id="stats-body" class="font-mono"></pre>
+  </div>
+
+  <!-- Wireframe mode badge -->
+  <div id="wire-badge" class="pointer-events-none fixed bottom-4 right-4 z-[70] border border-accent px-3 py-1 font-mono text-[11px] uppercase tracking-[0.2em] text-accent">wireframe</div>
 </body>
 </html>
