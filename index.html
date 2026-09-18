@@ -8,14 +8,33 @@
 
   <!--
     Theme bootstrap — runs BEFORE anything paints.
-    Reads the saved preference (or the OS preference) and applies the
-    .dark class immediately, so there is never a flash of the wrong theme.
+    Until the visitor uses the toggle, the theme follows the real sun in
+    London: dark after civil dusk, light after dawn. The same solar
+    position also lights the planet in the hero (script.js).
   -->
   <script>
     (function () {
+      // Solar elevation/azimuth (radians) for a date and location.
+      window.sunPosition = function (date, lat, lon) {
+        var rad = Math.PI / 180;
+        var d = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 86400000;
+        var g = rad * ((357.529 + 0.98560028 * d) % 360);
+        var q = (280.459 + 0.98564736 * d) % 360;
+        var L = rad * ((q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) % 360);
+        var e = rad * (23.439 - 0.00000036 * d);
+        var ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L));
+        var dec = Math.asin(Math.sin(e) * Math.sin(L));
+        var gmst = (18.697374558 + 24.06570982441908 * d) % 24;
+        var H = rad * ((gmst + lon / 15) * 15) - ra;
+        var la = lat * rad;
+        var el = Math.asin(Math.sin(la) * Math.sin(dec) + Math.cos(la) * Math.cos(dec) * Math.cos(H));
+        var az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(la) - Math.tan(dec) * Math.cos(la)) + Math.PI;
+        return { elevation: el, azimuth: az };
+      };
+
       var saved = localStorage.getItem('theme');
-      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (saved === 'dark' || (!saved && prefersDark)) {
+      var sunDown = window.sunPosition(new Date(), 51.5074, -0.1278).elevation < -6 * Math.PI / 180;
+      if (saved === 'dark' || (!saved && sunDown)) {
         document.documentElement.classList.add('dark');
       }
       document.documentElement.classList.add('js');
@@ -60,6 +79,9 @@
   <!-- GSAP core + ScrollTrigger -->
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+  <script defer src="planet.js"></script>
+  <script defer src="letters.js"></script>
+  <script defer src="voxel.js"></script>
   <script defer src="script.js"></script>
 </head>
 
@@ -84,6 +106,7 @@
           id="theme-toggle"
           type="button"
           aria-label="Toggle dark mode"
+          title="Follows the London sun until you pick one"
           class="theme-fade group relative flex h-8 w-14 items-center rounded-full border border-line px-1"
         >
           <!-- sliding knob -->
@@ -140,7 +163,7 @@
         </span>
       </h1>
 
-      <div class="relative mt-14 grid grid-cols-1 gap-8 border-t border-line pt-8 md:grid-cols-12">
+      <div id="hero-meta" class="relative mt-14 grid grid-cols-1 gap-8 border-t border-line pt-8 md:grid-cols-12">
         <p class="reveal-line md:col-span-5 md:col-start-1">
           <span class="reveal-text block max-w-md text-base leading-relaxed text-soft">
             Real-time rendering, procedural worlds and computer vision.
@@ -275,8 +298,14 @@
             <a href="https://github.com/John-Katsikis/PandaShell" class="block">
               <div class="work-visual theme-fade relative overflow-hidden border border-line bg-line/30" style="aspect-ratio: 4 / 3;">
             <div class="parallax-inner absolute inset-x-0 -top-[15%] h-[130%]">
-              <img src="images/PandaLogo2.png" alt="Panda — Rust developer shell"
-                  class="h-full w-full object-contain p-8" />
+              <!-- The logo PNG is sampled into a voxel grid and rendered in 3D by voxel.js -->
+              <canvas
+                id="panda-voxels"
+                data-src="images/PandaLogo2.png"
+                class="h-full w-full"
+                role="img"
+                aria-label="Panda — Rust developer shell, rendered as voxels"
+              ></canvas>
             </div>
           </div>
               <div class="mt-5 flex items-baseline justify-between">
@@ -431,7 +460,7 @@
       </div>
 
       <p class="mt-6 hidden font-mono text-[11px] text-soft/70 md:block">
-        psst — <kbd>`</kbd> stats overlay · <kbd>R</kbd> new planet · <kbd>↑↑↓↓←→←→BA</kbd> wireframe mode
+        psst — grab the big letters · <kbd>G</kbd> zero gravity · <kbd>R</kbd> new planet · <kbd>`</kbd> stats · <kbd>↑↑↓↓←→←→BA</kbd> wireframe
       </p>
     </footer>
   </main>

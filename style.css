@@ -116,6 +116,20 @@ a {
 .letter {
   display: inline-block;
   will-change: transform;
+  user-select: none;
+}
+
+/* Hero letters become draggable rigid bodies (letters.js, mouse only). */
+html.letters-physics .letter {
+  cursor: grab;
+}
+
+html.letters-physics .letter.is-dragging {
+  cursor: grabbing;
+}
+
+#panda-voxels {
+  display: block;
 }
 
 /* Pre-hide animated elements only when JS is present AND motion is
