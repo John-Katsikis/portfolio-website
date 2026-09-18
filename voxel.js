@@ -221,7 +221,7 @@ window.createVoxelLogo = function createVoxelLogo(canvas, options) {
     inView ? start() : stop();
   }).observe(canvas);
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
-  new MutationObserver(() => { readColors(); if (!running) draw(); }).observe(root, { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(() => { readColors(); if (!running) draw(); }).observe(root, { attributes: true, attributeFilter: ['class', 'style'] });
 
   if (animate && hoverEl) {
     if (finePointer) {

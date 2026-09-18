@@ -37,6 +37,21 @@
       if (saved === 'dark' || (!saved && sunDown)) {
         document.documentElement.classList.add('dark');
       }
+
+      // A randomised palette (palette button) is stored with light and dark
+      // variants; the one matching the current theme is written as inline
+      // CSS variables, overriding the defaults in style.css.
+      window.applyPalette = function (pal) {
+        var el = document.documentElement;
+        var set = pal && pal[el.classList.contains('dark') ? 'dark' : 'light'];
+        var keys = ['paper', 'ink', 'soft', 'line', 'accent'];
+        for (var i = 0; i < keys.length; i++) {
+          if (set) el.style.setProperty('--' + keys[i], set[keys[i]]);
+          else el.style.removeProperty('--' + keys[i]);
+        }
+      };
+      try { window.applyPalette(JSON.parse(localStorage.getItem('palette'))); } catch (e) {}
+
       document.documentElement.classList.add('js');
     })();
   </script>
@@ -101,6 +116,22 @@
         <a href="#about" class="hidden font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink sm:block">About</a>
         <a href="#contact" class="hidden font-mono text-xs uppercase tracking-[0.2em] text-soft transition-colors hover:text-ink sm:block">Contact</a>
 
+        <!-- Random palette -->
+        <button
+          id="palette-btn"
+          type="button"
+          aria-label="Randomise the colour palette"
+          title="Random palette · shift-click to reset"
+          class="theme-fade flex h-8 w-8 items-center justify-center rounded-full border border-line transition-colors hover:border-accent"
+        >
+          <svg class="palette-icon h-3.5 w-3.5" viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="1" y="1" width="6" height="6" fill="var(--accent)" />
+            <rect x="9" y="1" width="6" height="6" fill="var(--ink)" />
+            <rect x="1" y="9" width="6" height="6" fill="var(--soft)" />
+            <rect x="9" y="9" width="6" height="6" fill="var(--line)" />
+          </svg>
+        </button>
+
         <!-- Light / Dark toggle -->
         <button
           id="theme-toggle"
@@ -109,17 +140,20 @@
           title="Follows the London sun until you pick one"
           class="theme-fade group relative flex h-8 w-14 items-center rounded-full border border-line px-1"
         >
-          <!-- sliding knob -->
+          <!-- sliding knob: its transform is CSS-only (style.css); the squash
+               animation lives on the inner icon so the two never fight -->
           <span class="theme-knob theme-fade flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper">
-            <!-- sun (shown in light mode) -->
-            <svg class="h-3.5 w-3.5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-            </svg>
-            <!-- moon (shown in dark mode) -->
-            <svg class="hidden h-3.5 w-3.5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
-            </svg>
+            <span class="theme-knob-icon flex">
+              <!-- sun (shown in light mode) -->
+              <svg class="h-3.5 w-3.5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+              </svg>
+              <!-- moon (shown in dark mode) -->
+              <svg class="hidden h-3.5 w-3.5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+              </svg>
+            </span>
           </span>
         </button>
       </div>

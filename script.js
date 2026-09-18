@@ -38,33 +38,33 @@ document.addEventListener('DOMContentLoaded', () => {
      from the toggle as an expanding circle.
      ---------------------------------------------------------------- */
   const themeToggle = document.getElementById('theme-toggle');
+  const paletteBtn = document.getElementById('palette-btn');
   const sunNow = () => window.sunPosition(new Date(), LONDON.lat, LONDON.lon);
   const themeIsAuto = () => !localStorage.getItem('theme');
+
+  let palette = null;
+  try { palette = JSON.parse(localStorage.getItem('palette')); } catch { /* ignore corrupt storage */ }
 
   const setTheme = (mode) => {
     root.classList.toggle('dark', mode === 'dark');
     localStorage.setItem('theme', mode);
+    window.applyPalette(palette);
   };
 
-  themeToggle.addEventListener('click', () => {
-    const next = root.classList.contains('dark') ? 'light' : 'dark';
-
-    if (hasGsap && !reduceMotion) {
-      gsap.fromTo('.theme-knob', { scale: 0.7 }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
-    }
-
+  // Runs `change` inside a circular View Transition radiating from `origin`;
+  // falls back to the plain CSS cross-fade where unsupported.
+  const withWipe = (origin, change) => {
     if (!document.startViewTransition || reduceMotion) {
-      setTheme(next);
+      change();
       return;
     }
-
-    const bounds = themeToggle.getBoundingClientRect();
+    const bounds = origin.getBoundingClientRect();
     const x = bounds.left + bounds.width / 2;
     const y = bounds.top + bounds.height / 2;
     const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
 
     root.classList.add('vt');
-    const transition = document.startViewTransition(() => setTheme(next));
+    const transition = document.startViewTransition(change);
     transition.ready.then(() => {
       root.animate(
         { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
@@ -72,6 +72,60 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     });
     transition.finished.finally(() => root.classList.remove('vt'));
+  };
+
+  themeToggle.addEventListener('click', () => {
+    const next = root.classList.contains('dark') ? 'light' : 'dark';
+    if (hasGsap && !reduceMotion) {
+      gsap.fromTo('.theme-knob-icon', { scale: 0.6 }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
+    }
+    withWipe(themeToggle, () => setTheme(next));
+  });
+
+  /* Random palette: one hue for the accent, a second hue that faintly
+     tints paper/ink/soft/line, generated for both themes at once. */
+  const hslToHex = (h, s, l) => {
+    s /= 100; l /= 100;
+    const k = (n) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n) => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+    return '#' + [f(0), f(8), f(4)].map((v) => v.toString(16).padStart(2, '0')).join('');
+  };
+  const randomPalette = () => {
+    const accentHue = Math.random() * 360;
+    const tintHue = (accentHue + 120 + Math.random() * 120) % 360;
+    const tint = 8 + Math.random() * 14;
+    return {
+      light: {
+        paper: hslToHex(tintHue, tint + 6, 95.5),
+        ink: hslToHex(tintHue, tint, 8),
+        soft: hslToHex(tintHue, tint * 0.6, 42),
+        line: hslToHex(tintHue, tint, 84),
+        accent: hslToHex(accentHue, 82, 48),
+      },
+      dark: {
+        paper: hslToHex(tintHue, tint, 6),
+        ink: hslToHex(tintHue, tint * 0.7, 92),
+        soft: hslToHex(tintHue, tint * 0.5, 58),
+        line: hslToHex(tintHue, tint * 0.6, 16),
+        accent: hslToHex(accentHue, 78, 68),
+      },
+    };
+  };
+
+  paletteBtn.addEventListener('click', (event) => {
+    if (hasGsap && !reduceMotion) {
+      gsap.fromTo('.palette-icon', { rotation: 0, scale: 0.6 }, { rotation: 90, scale: 1, duration: 0.5, ease: 'back.out(2.5)' });
+    }
+    const next = event.shiftKey ? null : randomPalette();
+    withWipe(paletteBtn, () => {
+      palette = next;
+      if (palette) localStorage.setItem('palette', JSON.stringify(palette));
+      else localStorage.removeItem('palette');
+      window.applyPalette(palette);
+    });
+    const accent = next ? next[root.classList.contains('dark') ? 'dark' : 'light'].accent : null;
+    showToast(accent ? `new palette · accent ${accent} · shift-click to reset` : 'palette reset · blueprint cobalt');
   });
 
   /* ----------------------------------------------------------------
@@ -103,8 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
     'font: 12px "IBM Plex Mono", monospace; color: #888; margin-left: 8px'
   );
   console.log(
-    '%c grab a letter %c drag & throw the title\n%c G  %c zero gravity\n%c R  %c regenerate the planet\n%c `  %c stats overlay\n%c ↑↑↓↓←→←→BA %c wireframe mode\n%c theme %c follows the London sun until you use the toggle — localStorage.removeItem("theme") goes back to auto\n%c planet %c window.planet — try planet.setSun([0, 0, -1]) for midnight',
-    kbd, txt, kbd, txt, kbd, txt, kbd, txt, kbd, txt, kbd, txt, kbd, txt
+    '%c grab a letter %c drag & throw the title\n%c G  %c zero gravity\n%c R  %c regenerate the planet\n%c `  %c stats overlay\n%c ↑↑↓↓←→←→BA %c wireframe mode\n%c theme %c follows the London sun until you use the toggle — localStorage.removeItem("theme") goes back to auto\n%c planet %c window.planet — try planet.setSun([0, 0, -1]) for midnight\n%c palette %c the squares button in the nav rolls new colours · shift-click resets',
+    kbd, txt, kbd, txt, kbd, txt, kbd, txt, kbd, txt, kbd, txt, kbd, txt, kbd, txt
   );
 
   /* ----------------------------------------------------------------
@@ -143,7 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const { elevation: el, azimuth: az } = sun;
     // x east, y north (up on screen), z toward the camera (London's zenith)
     globe.setSun([Math.cos(el) * Math.sin(az), Math.cos(el) * Math.cos(az), Math.sin(el)]);
-    if (themeIsAuto()) root.classList.toggle('dark', el < DUSK);
+    if (themeIsAuto()) {
+      root.classList.toggle('dark', el < DUSK);
+      window.applyPalette(palette);
+    }
   };
   applySun();
   setInterval(applySun, 60000);
@@ -189,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `voxels  ${panda ? panda.count() : 0}\n` +
       `sun     el ${deg(sun.elevation)} az ${deg(sun.azimuth)} (london)\n` +
       `theme   ${dark ? 'dark' : 'light'} · ${themeIsAuto() ? 'auto' : 'manual'}\n` +
+      `palette ${palette ? palette[dark ? 'dark' : 'light'].accent : 'default'}\n` +
       `seed    0x${globe.seedHex()}\n` +
       `mode    ${root.classList.contains('wireframe') ? 'wireframe' : 'solid'}\n` +
       `gravity ${physics?.isActive() ? (physics.gravityOn() ? 'on' : 'zero-g') : 'static'}`;

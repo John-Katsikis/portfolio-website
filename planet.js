@@ -481,7 +481,7 @@ window.createPlanet = function createPlanet(canvas, options) {
     inView ? start() : stop();
   }).observe(canvas);
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
-  new MutationObserver(() => { readColors(); redraw(); }).observe(root, { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(() => { readColors(); redraw(); }).observe(root, { attributes: true, attributeFilter: ['class', 'style'] });
 
   if (finePointer) {
     window.addEventListener('mousemove', (event) => {
